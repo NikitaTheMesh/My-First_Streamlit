@@ -15,7 +15,7 @@ def load_data(path):
     df=pd.read_csv(path)
     return df
 
-mpg_df_raw=load_data(path=".\my-first-streamlitapp\data\raw\mpg.csv") #For the speed
+mpg_df_raw=load_data(path="./data/raw/mpg.csv") #For the speed
 mpg_df=deepcopy(mpg_df_raw) #This is for security? I think this cashes the og instead of a copy
 
 #The reason we do this, is we don't just keep re-running the cache, it lets the website keep running every time as a new load
