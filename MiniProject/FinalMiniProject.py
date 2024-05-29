@@ -7,7 +7,40 @@ import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
-from conversion.City_To_Kanton_Conversion import city_to_canton # Ensure the local module is accessible
+import urllib.request
+import os
+
+# Function to download the file from GitHub
+def download_file(url, save_path):
+    if not os.path.exists(save_path):
+        urllib.request.urlretrieve(url, save_path)
+
+# Define file URLs
+geojson_url = 'https://raw.githubusercontent.com/NikitaTheMesh/My-First_Streamlit/main/MiniProject/json/georef-switzerland-kanton.geojson'
+conventional_csv_url = 'https://raw.githubusercontent.com/NikitaTheMesh/My-First_Streamlit/main/MiniProject/data/conventional_power_plants_EU_filtered.csv'
+renewable_csv_url = 'https://raw.githubusercontent.com/NikitaTheMesh/My-First_Streamlit/main/MiniProject/data/renewable_power_plants_CH.csv'
+conversion_py_url = 'https://raw.githubusercontent.com/NikitaTheMesh/My-First_Streamlit/main/MiniProject/conversion/City_To_Kanton_Conversion.py'
+
+# Define local file paths
+geojson_path = 'georef-switzerland-kanton.geojson'
+conventional_csv_path = 'conventional_power_plants_EU_filtered.csv'
+renewable_csv_path = 'renewable_power_plants_CH.csv'
+conversion_py_path = 'City_To_Kanton_Conversion.py'
+
+# Download the files
+download_file(geojson_url, geojson_path)
+download_file(conventional_csv_url, conventional_csv_path)
+download_file(renewable_csv_url, renewable_csv_path)
+download_file(conversion_py_url, conversion_py_path)
+
+# Import the downloaded module
+import importlib.util
+
+spec = importlib.util.spec_from_file_location("City_To_Kanton_Conversion", conversion_py_path)
+city_to_canton = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(city_to_canton)
+
+# Now you can use city_to_canton.city_to_canton
 
 # Title for the Streamlit app
 st.title('Power Generation Capacity in Switzerland by Canton')
@@ -250,7 +283,6 @@ elif option == 'Clean Energy Sources Bar Chart':
     display_renewable_energy_bar_chart()
 elif option == 'Clean Energy Sources Treemap':
     display_renewable_energy_treemap()
-
 
 
 
