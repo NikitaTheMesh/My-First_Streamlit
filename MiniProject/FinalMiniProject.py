@@ -9,7 +9,20 @@ import json
 import plotly.express as px
 from conversion.City_To_Kanton_Conversion import city_to_canton # Ensure the local module is accessible
 
+# Title for the Streamlit app
 st.title('Power Generation Capacity in Switzerland by Canton')
+
+# Dropdown for selecting the figure to display
+option = st.selectbox(
+    'Select a visualization:',
+    [
+        'Total Generation Capacity by Canton',
+        'Conventional Power Plants in Switzerland by Canton',
+        'Clean Energy Sources in Switzerland by Canton',
+        'Clean Energy Sources Bar Chart',
+        'Clean Energy Sources Treemap'
+    ]
+)
 
 
 # Define file paths
@@ -226,12 +239,18 @@ def display_renewable_energy_treemap():
     st.plotly_chart(fig)
 
 
-# Display the figures
-display_total_capacity_choropleth()
-display_conventional_plant_counts_choropleth()
-display_renewable_energy_choropleth()
-display_renewable_energy_bar_chart()
-display_renewable_energy_treemap()
+# Display the selected figure based on the dropdown selection
+if option == 'Total Generation Capacity by Canton':
+    display_total_capacity_choropleth()
+elif option == 'Conventional Power Plants in Switzerland by Canton':
+    display_conventional_plant_counts_choropleth()
+elif option == 'Clean Energy Sources in Switzerland by Canton':
+    display_renewable_energy_choropleth()
+elif option == 'Clean Energy Sources Bar Chart':
+    display_renewable_energy_bar_chart()
+elif option == 'Clean Energy Sources Treemap':
+    display_renewable_energy_treemap()
+
 
 
 
