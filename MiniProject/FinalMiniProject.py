@@ -58,11 +58,6 @@ option = st.selectbox(
 )
 
 
-# Define file paths
-geojson_path = r"C:\Users\hellr\Documents\Constructor Academy MiniProject\MiniProject\json\georef-switzerland-kanton.geojson"
-conventional_csv_path = r"C:\Users\hellr\Documents\Constructor Academy MiniProject\MiniProject\data\conventional_power_plants_EU_filtered.csv"
-renewable_csv_path = r"C:\Users\hellr\Documents\Constructor Academy MiniProject\MiniProject\data\renewable_power_plants_CH.csv"
-
 # Load the CSV datasets
 df_conventional = pd.read_csv(conventional_csv_path)
 df_renewable = pd.read_csv(renewable_csv_path)
