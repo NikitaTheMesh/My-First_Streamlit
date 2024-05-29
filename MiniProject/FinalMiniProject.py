@@ -36,9 +36,14 @@ download_file(conversion_py_url, conversion_py_path)
 # Import the downloaded module
 import importlib.util
 
+# Load the City_To_Kanton_Conversion module
 spec = importlib.util.spec_from_file_location("City_To_Kanton_Conversion", conversion_py_path)
-city_to_canton = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(city_to_canton)
+City_To_Kanton_Conversion = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(City_To_Kanton_Conversion)
+
+# Now you can use the city_to_canton function
+city_to_canton = City_To_Kanton_Conversion.city_to_canton
+
 
 # Now you can use city_to_canton.city_to_canton
 
