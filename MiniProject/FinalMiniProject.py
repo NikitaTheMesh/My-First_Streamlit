@@ -3,10 +3,14 @@
 
 # In[19]:
 
+import streamlit as st
 import pandas as pd
 import json
 import plotly.express as px
 from conversion.City_To_Kanton_Conversion import city_to_canton # Ensure the local module is accessible
+
+st.title('Power Generation Capacity in Switzerland by Canton')
+
 
 # Define file paths
 geojson_path = r"C:\Users\hellr\Documents\Constructor Academy MiniProject\MiniProject\json\georef-switzerland-kanton.geojson"
@@ -51,35 +55,33 @@ canton_agg['hover_text'] = canton_agg.apply(
 with open(geojson_path, 'r') as f:
     geojson = json.load(f)
 
-# Create the choropleth map
-fig5 = px.choropleth_mapbox(
-    canton_agg,
-    geojson=geojson,
-    locations='canton',
-    featureidkey="properties.kan_name",
-    color='total_capacity',
-    color_continuous_scale="Viridis",
-    range_color=(0, canton_agg['total_capacity'].max()),
-    mapbox_style="carto-positron",
-    zoom=7,
-    center={"lat": 46.8, "lon": 8.3},
-    opacity=0.6,
-    labels={'total_capacity': 'Total Generation Capacity (MW)'},
-    hover_data={'hover_text': True, 'canton': False, 'total_capacity': False}
-)
+# Function to create and display the first choropleth map
+def display_total_capacity_choropleth():
+    fig = px.choropleth_mapbox(
+        canton_agg,
+        geojson=geojson,
+        locations='canton',
+        featureidkey="properties.kan_name",
+        color='total_capacity',
+        color_continuous_scale="Viridis",
+        range_color=(0, canton_agg['total_capacity'].max()),
+        mapbox_style="carto-positron",
+        zoom=7,
+        center={"lat": 46.8, "lon": 8.3},
+        opacity=0.6,
+        labels={'total_capacity': 'Total Generation Capacity (MW)'},
+        hover_data={'hover_text': True, 'canton': False, 'total_capacity': False}
+    )
+    fig.update_layout(
+        title='Total Generation Capacity by Canton with Energy Source Breakdown',
+        title_font_size=18,
+        margin={"r":0,"t":0,"l":0,"b":0}
+    )
+    fig.update_traces(
+        hovertemplate="<b>%{location}</b><br>Total Capacity: %{z} MW<br>%{customdata}"
+    )
+    st.plotly_chart(fig)
 
-# Update the layout and hover template
-fig5.update_layout(
-    title='Total Generation Capacity by Canton with Energy Source Breakdown',
-    title_font_size=18,
-    margin={"r":0,"t":0,"l":0,"b":0}
-)
-fig5.update_traces(
-    hovertemplate="<b>%{location}</b><br>Total Capacity: %{z} MW<br>%{customdata}"
-)
-
-# Show the figure
-fig5.show()
 
 # Aggregate the count and types of power plants by canton
 canton_plant_counts = df_conventional.groupby('canton').agg(
@@ -91,32 +93,29 @@ canton_plant_counts = df_conventional.groupby('canton').agg(
 with open(geojson_path, 'r') as f:
     geojson = json.load(f)
 
-# Create the choropleth map
-fig4 = px.choropleth_mapbox(
-    canton_plant_counts,
-    geojson=geojson,
-    locations='canton',
-    featureidkey="properties.kan_name",
-    color='count',
-    color_continuous_scale="Viridis",
-    range_color=(0, canton_plant_counts['count'].max()),
-    mapbox_style="carto-positron",
-    zoom=7,
-    center={"lat": 46.8, "lon": 8.3},
-    opacity=0.6,
-    labels={'count': 'Number of Power Plants'},
-    hover_data={'canton': False, 'count': True, 'types': True}
-)
-
-# Update the layout
-fig4.update_layout(
-    title='Conventional Power Plants in Switzerland by Canton',
-    title_font_size=18,
-    margin={"r":0,"t":0,"l":0,"b":0}
-)
-
-# Show the figure
-fig4.show()
+# Function to create and display the second choropleth map
+def display_conventional_plant_counts_choropleth():
+    fig = px.choropleth_mapbox(
+        canton_plant_counts,
+        geojson=geojson,
+        locations='canton',
+        featureidkey="properties.kan_name",
+        color='count',
+        color_continuous_scale="Viridis",
+        range_color=(0, canton_plant_counts['count'].max()),
+        mapbox_style="carto-positron",
+        zoom=7,
+        center={"lat": 46.8, "lon": 8.3},
+        opacity=0.6,
+        labels={'count': 'Number of Power Plants'},
+        hover_data={'canton': False, 'count': True, 'types': True}
+    )
+    fig.update_layout(
+        title='Conventional Power Plants in Switzerland by Canton',
+        title_font_size=18,
+        margin={"r":0,"t":0,"l":0,"b":0}
+    )
+    st.plotly_chart(fig)
 
 
 # Additional visualizations
@@ -137,46 +136,46 @@ canton_mapping = {
 }
 df_aggregated['canton_full'] = df_aggregated['canton'].map(canton_mapping)
 
-# Choropleth map for renewable energy sources
-fig_renewable = px.choropleth_mapbox(
-    df_aggregated,
-    geojson=geojson,
-    locations='canton_full',
-    featureidkey="properties.kan_name",
-    color='total_count',
-    color_continuous_scale=px.colors.sequential.Plasma,
-    mapbox_style="carto-positron",
-    center={"lat": 46.8, "lon": 8.3},
-    zoom=7,
-    opacity=0.6,
-    labels={'total_count': 'Total Clean Energy Sources'}
-)
+# Function to create and display the third choropleth map
+def display_renewable_energy_choropleth():
+    fig = px.choropleth_mapbox(
+        df_aggregated,
+        geojson=geojson,
+        locations='canton_full',
+        featureidkey="properties.kan_name",
+        color='total_count',
+        color_continuous_scale=px.colors.sequential.Plasma,
+        mapbox_style="carto-positron",
+        center={"lat": 46.8, "lon": 8.3},
+        zoom=7,
+        opacity=0.6,
+        labels={'total_count': 'Total Clean Energy Sources'}
+    )
 
-# Add detailed hover information
-hover_data = ['total_count', 'Bioenergy', 'Hydro', 'Solar', 'Wind']
-for col in hover_data:
-    if col not in df_aggregated.columns:
-        df_aggregated[col] = 0
+    hover_data = ['total_count', 'Bioenergy', 'Hydro', 'Solar', 'Wind']
+    for col in hover_data:
+        if col not in df_aggregated.columns:
+            df_aggregated[col] = 0
 
-fig_renewable.update_traces(
-    hovertemplate=(
-        '<b>%{properties.kan_name}</b><br>'
-        'Total Clean Energy Sources: %{z}<br>'
-        'Bioenergy: %{customdata[1]}<br>'
-        'Hydro: %{customdata[2]}<br>'
-        'Solar: %{customdata[3]}<br>'
-        'Wind: %{customdata[4]}<extra></extra>'
-    ),
-    customdata=df_aggregated[hover_data].values
-)
+    fig.update_traces(
+        hovertemplate=(
+            '<b>%{properties.kan_name}</b><br>'
+            'Total Clean Energy Sources: %{z}<br>'
+            'Bioenergy: %{customdata[1]}<br>'
+            'Hydro: %{customdata[2]}<br>'
+            'Solar: %{customdata[3]}<br>'
+            'Wind: %{customdata[4]}<extra></extra>'
+        ),
+        customdata=df_aggregated[hover_data].values
+    )
 
-fig_renewable.update_layout(
-    title='Clean Energy Sources in Switzerland by Canton',
-    title_font_size=18,
-    margin={"r":0,"t":0,"l":0,"b":0}
-)
+    fig.update_layout(
+        title='Clean Energy Sources in Switzerland by Canton',
+        title_font_size=18,
+        margin={"r":0,"t":0,"l":0,"b":0}
+    )
+    st.plotly_chart(fig)
 
-fig_renewable.show()
 
 # Stacked bar chart for renewable energy sources
 df_melted = df_aggregated.melt(id_vars=['canton_full', 'total_count'],
@@ -184,47 +183,56 @@ df_melted = df_aggregated.melt(id_vars=['canton_full', 'total_count'],
                                var_name='energy_source',
                                value_name='count')
 
-fig_bar = px.bar(
-    df_melted,
-    x='canton_full',
-    y='count',
-    color='energy_source',
-    title='Clean Energy Sources in Switzerland by Canton',
-    labels={'count': 'Number of Clean Energy Sources', 'canton_full': 'Canton'},
-    text='count'
-)
+# Function to create and display the stacked bar chart
+def display_renewable_energy_bar_chart():
+    fig = px.bar(
+        df_melted,
+        x='canton_full',
+        y='count',
+        color='energy_source',
+        title='Clean Energy Sources in Switzerland by Canton',
+        labels={'count': 'Number of Clean Energy Sources', 'canton_full': 'Canton'},
+        text='count'
+    )
 
-fig_bar.update_layout(
-    barmode='stack',
-    xaxis_tickangle=-45,
-    xaxis_title='Canton',
-    yaxis_title='Number of Clean Energy Sources',
-    legend_title='Energy Source',
-    title={'x': 0.5},
-    margin={"r": 0, "t": 50, "l": 0, "b": 0}
-)
+    fig.update_layout(
+        barmode='stack',
+        xaxis_tickangle=-45,
+        xaxis_title='Canton',
+        yaxis_title='Number of Clean Energy Sources',
+        legend_title='Energy Source',
+        title={'x': 0.5},
+        margin={"r": 0, "t": 50, "l": 0, "b": 0}
+    )
+    st.plotly_chart(fig)
 
-fig_bar.show()
 
-# Treemap for renewable energy sources
-df_detailed['canton_full'] = df_detailed['canton'].map(canton_mapping)
+# Function to create and display the treemap
+def display_renewable_energy_treemap():
+    df_detailed['canton_full'] = df_detailed['canton'].map(canton_mapping)
+    fig = px.treemap(
+        df_detailed,
+        path=[px.Constant("Switzerland"), 'canton_full', 'energy_source'],
+        values='count',
+        color='count',
+        color_continuous_scale='Viridis',
+        title='Distribution of Clean Energy Sources in Switzerland by Canton and Type',
+        labels={'count': 'Number of Energy Sources', 'canton_full': 'Canton', 'energy_source': 'Energy Source'}
+    )
+    fig.update_layout(
+        title={'x': 0.5},
+        margin={"r": 0, "t": 50, "l": 0, "b": 0}
+    )
+    st.plotly_chart(fig)
 
-fig_treemap = px.treemap(
-    df_detailed,
-    path=[px.Constant("Switzerland"), 'canton_full', 'energy_source'],
-    values='count',
-    color='count',
-    color_continuous_scale='Viridis',
-    title='Distribution of Clean Energy Sources in Switzerland by Canton and Type',
-    labels={'count': 'Number of Energy Sources', 'canton_full': 'Canton', 'energy_source': 'Energy Source'}
-)
 
-fig_treemap.update_layout(
-    title={'x': 0.5},
-    margin={"r": 0, "t": 50, "l": 0, "b": 0}
-)
+# Display the figures
+display_total_capacity_choropleth()
+display_conventional_plant_counts_choropleth()
+display_renewable_energy_choropleth()
+display_renewable_energy_bar_chart()
+display_renewable_energy_treemap()
 
-fig_treemap.show()
 
 
 
